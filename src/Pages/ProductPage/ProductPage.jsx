@@ -17,7 +17,7 @@ function ProductPage()
     const productDetailsOnStorage = localStorage.getItem(`${id}`)
     const productdetails = JSON.parse(productDetailsOnStorage)
     const {
-        _id,
+        //_id,
         bookName,
         author,
         originalPrice,
@@ -25,7 +25,7 @@ function ProductPage()
         discountPercent,
         imgSrc, 
         imgAlt,
-        badgeText, 
+        //badgeText, 
         outOfStock,
         rating, 
         description
@@ -62,7 +62,7 @@ function ProductPage()
                 })()
             }
         }   
-    },[])
+    },[dispatchUserCart, dispatchUserWishlist])
 
     async function addItemToWishlist()
     {

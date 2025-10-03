@@ -1,148 +1,172 @@
-import React, { useState, useEffect } from 'react'
-import jwt_decode from "jwt-decode"
-import { useLocation } from "react-router-dom"
-import "./Shop.css"
-import { 
-  Sidebar, 
-  ProductCard,
+import React, { useState, useEffect } from "react";
+import jwt_decode from "jwt-decode";
+import { useLocation } from "react-router-dom";
+import "./Shop.css";
+import {
+  //Sidebar,
   useWishlist,
   useCart,
   useSearchBar,
-  Pagination
-} from "../../index.js"
-import { useProductAvailable } from "../../Context/product-context"
-import axios from 'axios'
+} from "../../index.js";
+import { Pagination } from "../../Components/Pagination/Pagination.jsx";
 
-function Shop(props) {
+import { useProductAvailable } from "../../Context/product-context";
+import axios from "axios";
+import { Link } from "react-router-dom";
+const sampleReviews = [
+  { user: "Ravi", comment: "Good book!" },
+  { user: "Shami", comment: "Nice read." },
+  { user: "Anita", comment: "Very interesting." },
+  { user: "Vikram", comment: "Loved it!" },
+  { user: "Priya", comment: "Could be better." },
+  { user: "Kiran", comment: "Amazing story!" },
+];
 
-    let { 
-      productsAvailableList, 
-      dispatchSortedProductsList, 
-      productFilterOptions 
-    } = useProductAvailable()
+function addRandomRatingAndReviews(books) {
+  return books.map((book) => {
+    const randomRating = (Math.random() * 5).toFixed(1); // ⭐ between 0–5
+    const randomReviews = Array.from({ length: Math.floor(Math.random() * 3) + 1 }, () => {
+      return sampleReviews[Math.floor(Math.random() * sampleReviews.length)];
+    });
 
-    const { dispatchUserWishlist } = useWishlist()
-    const { dispatchUserCart } = useCart()
-    const { pathname } = useLocation();
-    const { searchBarTerm } = useSearchBar()
-    const [ currentPage, setCurrentPage ] = useState(1)
-    const [ productsPerPage, setProductsPerPage ] = useState(12)
-  
-    useEffect(() => {
-      window.scrollTo(0, 0);
-    }, [pathname, currentPage]);
-
-    useEffect(()=>{
-      
-      if( (JSON.stringify(productsAvailableList)===JSON.stringify([]))
-          && (
-              JSON.stringify(productFilterOptions)===JSON.stringify({
-              includeOutOfStock        : true,
-              onlyFastDeliveryProducts : false,
-              minPrice                 : 0,
-              maxPrice                 : 1200,
-              fiction                  : true,
-              thriller                 : true,
-              tech                     : true,
-              philosophy               : true,
-              romance                  : true,
-              manga                    : true,
-              minRating                : 1}) 
-             )
-        )
-      {
-        //Refresh happened - Filters are default yet productsAvailableList is empty
-        //Redo api call to get data
-        try {
-          (async () => {
-            const productsAvailableData = await axios.get('https://bookztron-server.vercel.app/api/home/products')
-            dispatchSortedProductsList({type:"ADD_ITEMS_TO_PRODUCTS_AVAILABLE_LIST", payload: [...productsAvailableData.data.productsList] })
-          }) ()
-        }
-        catch(error) {
-          console.log("Error : ", error);
-        }
-      }
-    },[])
-
-    useEffect(()=>{
-      const token=localStorage.getItem('token')
-
-      if(token)
-      {
-        const user = jwt_decode(token)
-        if(!user)
-        {
-            localStorage.removeItem('token')
-        }
-        else
-        {
-          (async function getUpdatedWishlistAndCart()
-          {
-            let updatedUserInfo = await axios.get(
-            "https://bookztron-server.vercel.app/api/user",
-            {
-              headers:
-              {
-                'x-access-token': localStorage.getItem('token'),
-              }
-            })
-
-            if(updatedUserInfo.data.status==="ok")
-            {
-              dispatchUserWishlist({type: "UPDATE_USER_WISHLIST",payload: updatedUserInfo.data.user.wishlist})
-              dispatchUserCart({type: "UPDATE_USER_CART",payload: updatedUserInfo.data.user.cart})
-            }
-          })()
-        }
-      }   
-    },[])
-
-    let searchedProducts = productsAvailableList
-    .filter(productdetails=>{
-      return (
-        productdetails.bookName.toLowerCase().includes(searchBarTerm.toLowerCase()) 
-        || productdetails.author.toLowerCase().includes(searchBarTerm.toLowerCase())
-      )
-    })
-
-    const indexOfLastProduct = currentPage * productsPerPage;
-    const indexOfFirstProduct= indexOfLastProduct - productsPerPage;
-    let currentSearchedProducts = searchedProducts.slice(indexOfFirstProduct, indexOfLastProduct)
-    let currentProductsAvailableList = productsAvailableList.slice(indexOfFirstProduct, indexOfLastProduct)
-
-    return (
-        <div>
-            <div className='shop-container'>
-                <Sidebar/>
-                <div className='products-container'>
-                    <h2>Showing {searchBarTerm === ""?productsAvailableList.length:searchedProducts.length} products</h2>
-                    <div className="products-card-grid">
-                        {
-                            productsAvailableList && 
-                            (
-                              searchBarTerm === "" ?
-                              (
-                                currentProductsAvailableList.map(productdetails => (
-                                  <ProductCard key={productdetails._id} productdetails={productdetails} />
-                                ))
-                              ) : (
-                                currentSearchedProducts.map(productdetails => (
-                                  <ProductCard key={productdetails._id} productdetails={productdetails} />
-                                ))
-                              )
-                            )
-                        }
-                    </div>
-                    <Pagination 
-                      productsPerPage={productsPerPage} 
-                      totalProducts={searchBarTerm === ""?productsAvailableList.length:searchedProducts.length}
-                      paginate={setCurrentPage}
-                    />
-                </div>
-            </div>
-        </div>
-    )
+    return {
+      ...book,
+      rating: randomRating,
+      reviews: randomReviews,
+    };
+  });
 }
 
-export { Shop }
+
+function Shop() {
+  let { productsAvailableList, dispatchSortedProductsList } =
+    useProductAvailable();
+
+  const productsPerPage = 8;
+  const { dispatchUserWishlist } = useWishlist();
+  const { dispatchUserCart } = useCart();
+  const { pathname, state } = useLocation();
+  const { searchBarTerm } = useSearchBar();
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // genre passed from Home.jsx
+  const category = state?.category || null;
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname, currentPage]);
+
+  // ✅ Fetch books by genre (or all if no genre)
+  useEffect(() => {
+  (async () => {
+    try {
+      let url = category
+        ? `${process.env.REACT_APP_API_URL}/api/books/category/${category}`
+        : `${process.env.REACT_APP_API_URL}/api/books`;
+
+      console.log("Fetching from 👉", url);   // ✅ check exact URL
+
+      const res = await axios.get(url);
+
+      console.log("Books API response 👉", res.data);   // ✅ log what API returns
+      dispatchSortedProductsList({
+        type: "ADD_ITEMS_TO_PRODUCTS_AVAILABLE_LIST",
+        payload: addRandomRatingAndReviews(res.data.books || res.data),
+      });
+
+    } catch (error) {
+      console.error("Error fetching books:", error);
+    }
+  })();
+}, [category, dispatchSortedProductsList]);
+
+
+  // ✅ Fetch user wishlist & cart if logged in
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      const user = jwt_decode(token);
+      if (!user) {
+        localStorage.removeItem("token");
+      } else {
+        (async function getUpdatedWishlistAndCart() {
+          let updatedUserInfo = await axios.get(
+            "https://bookztron-server.vercel.app/api/user",
+            {
+              headers: {
+                "x-access-token": localStorage.getItem("token"),
+              },
+            }
+          );
+
+          if (updatedUserInfo.data.status === "ok") {
+            dispatchUserWishlist({
+              type: "UPDATE_USER_WISHLIST",
+              payload: updatedUserInfo.data.user.wishlist,
+            });
+            dispatchUserCart({
+              type: "UPDATE_USER_CART",
+              payload: updatedUserInfo.data.user.cart,
+            });
+          }
+        })();
+      }
+    }
+  }, [dispatchUserCart, dispatchUserWishlist]);
+
+  // ✅ Apply search
+  let filteredBooks = productsAvailableList.filter((book) => {
+    return (
+      book.title.toLowerCase().includes(searchBarTerm.toLowerCase()) ||
+      book.author?.toLowerCase().includes(searchBarTerm.toLowerCase())
+    );
+  });
+
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  let currentBooks = filteredBooks.slice(
+    indexOfFirstProduct,
+    indexOfLastProduct
+  );
+
+  return (
+    <div>
+      <div className="shop-container">
+        { /*<Sidebar />  */}
+        <div className="products-container">
+        <h2>Showing {filteredBooks.length} {category ? `${category} books` : "books"}</h2>
+
+
+        <div className="books-card-grid">
+  {currentBooks.map((book) => (
+    <Link key={book._id} to={`/book/${book._id}`}>
+      <div className="book-card">
+        <img
+          src={
+            book.coverUrl?.replace("1000", "200") ||
+            "https://via.placeholder.com/150"
+          }
+          alt={book.title}
+          loading="lazy"
+          className="book-img"
+        />
+        <h3 className="book-title">{book.title}</h3>
+        <p className="book-author">By {book.author}</p>
+      </div>
+    </Link>
+  ))}
+</div>
+
+          <Pagination
+            productsPerPage={productsPerPage}
+            totalProducts={filteredBooks.length}
+            paginate={setCurrentPage}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Shop 

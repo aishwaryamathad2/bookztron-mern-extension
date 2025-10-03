@@ -29,7 +29,7 @@ You may also see any lint errors in the console.
 4. Sort and filter products
    - Sort by Price Low to High and High to Low
    - Filter using Minimum and Maximum Price Range
-   - Filter by Book Genre Categories
+   - Filter by Book category Categories
    - Filter by average product rating
    - Filter to include/exclude out of stock products
    - Filter products as per fast delivery availability

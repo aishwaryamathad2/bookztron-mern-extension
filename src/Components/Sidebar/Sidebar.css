@@ -24,6 +24,12 @@
     }
 }
 
+/* Force remove Bookztron's old orange gradient */
+.dashboard, .sidebar .menu, .menu {
+  background: none !important;
+  background-color: #e6e6fa !important; /* lavender */
+}
+
 .filter-clear-options
 {
     max-width: 31.5rem;

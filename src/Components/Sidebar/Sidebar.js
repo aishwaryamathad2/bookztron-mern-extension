@@ -5,7 +5,7 @@ import { useGenre } from "../../Context/genre-context";
 
 function Sidebar() {
   const {
-  productsAvailableList,
+  //productsAvailableList,
   dispatchSortedProductsList,
   productFilterOptions,
   dispatchProductFilterOptions
@@ -39,10 +39,21 @@ function Sidebar() {
 
 
   useEffect(()=>{
-    dispatchSortedProductsList({type:"UPDATE_LIST_AS_PER_FILTERS",payload:productFilterOptions})
-    if(sortPriceLowToHigh){ setSortPriceLowToHigh(true); setSortPriceHighToLow(false); dispatchSortedProductsList({type:"PRICE_LOW_TO_HIGH"}) }
-    if(sortPriceHighToLow){ setSortPriceLowToHigh(false); setSortPriceHighToLow(true); dispatchSortedProductsList({type:"PRICE_HIGH_TO_LOW"}) }
-  },[productFilterOptions, dispatchSortedProductsList])
+  dispatchSortedProductsList({type:"UPDATE_LIST_AS_PER_FILTERS",payload:productFilterOptions})
+  
+  if(sortPriceLowToHigh){ 
+    setSortPriceLowToHigh(true); 
+    setSortPriceHighToLow(false); 
+    dispatchSortedProductsList({type:"PRICE_LOW_TO_HIGH"}) 
+  }
+  
+  if(sortPriceHighToLow){ 
+    setSortPriceLowToHigh(false); 
+    setSortPriceHighToLow(true); 
+    dispatchSortedProductsList({type:"PRICE_HIGH_TO_LOW"}) 
+  }
+},[dispatchSortedProductsList, productFilterOptions, sortPriceLowToHigh, sortPriceHighToLow]);
+
 
   function clearFilters()
   {

@@ -269,30 +269,59 @@ function productsOrderFunc(state,action)
     }
 }
 
-let ProductsProvider = ({children}) => 
-{
-    const [ productsAvailableList, dispatchSortedProductsList] = useReducer(productsOrderFunc,productList)
-    const [ productFilterOptions, dispatchProductFilterOptions ] = useReducer(updateProductFilters,filterOptionsObject)
+let ProductsProvider = ({ children }) => {
+  const [productsAvailableList, dispatchSortedProductsList] = useReducer(
+    productsOrderFunc,
+    productList
+  );
+  const [productFilterOptions, dispatchProductFilterOptions] = useReducer(
+    updateProductFilters,
+    filterOptionsObject
+  );
 
-    useEffect(() => {
+  useEffect(() => {
+    (async () => {
       try {
-        (async () => {
-            const productsAvailableData = await axios.get('https://bookztron-server.vercel.app/api/home/products')
-            productList = [...productsAvailableData.data.productsList]
-        }) ()
+        const productsAvailableData = await axios.get(
+          `${process.env.REACT_APP_API_URL}/api/books`
+        );
+
+        const data = productsAvailableData.data;
+
+        if (Array.isArray(data)) {
+          productList = [...data];
+        } else if (data.books && Array.isArray(data.books)) {
+          productList = [...data.books];
+        } else {
+          console.warn("Unexpected API response:", data);
+          productList = [];
+        }
+
+        dispatchSortedProductsList({
+          type: "ADD_ITEMS_TO_PRODUCTS_AVAILABLE_LIST",
+          payload: productList,
+        });
+      } catch (error) {
+        console.error("Error fetching books:", error);
       }
-      catch(error) {
-        console.log("Error : ", error)
-      }
-    },[])
+    })();
+  }, []);
 
-    return (
-        <ProductsContext.Provider value={{ productsAvailableList, dispatchSortedProductsList, productFilterOptions, dispatchProductFilterOptions}}>
-            {children}
-        </ProductsContext.Provider>
-    )
-}
+  return (
+    <ProductsContext.Provider
+      value={{
+        productsAvailableList,
+        dispatchSortedProductsList,
+        productFilterOptions,
+        dispatchProductFilterOptions,
+      }}
+    >
+      {children}
+    </ProductsContext.Provider>
+  );
+};
 
-let useProductAvailable = () => useContext(ProductsContext)
+// ✅ define it here
+const useProductAvailable = () => useContext(ProductsContext);
 
-export { ProductsProvider, useProductAvailable}
+export { ProductsProvider, useProductAvailable };

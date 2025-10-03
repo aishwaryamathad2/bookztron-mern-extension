@@ -1,0 +1,30 @@
+.book-details-container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+
+.book-details-card {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.book-details-img {
+  width: 250px;
+  height: auto;
+  border-radius: 8px;
+}
+
+.book-details-info {
+  flex: 1;
+}
+
+.reviews-section {
+  margin-top: 2rem;
+}
+
+.review-card {
+  border-bottom: 1px solid #ccc;
+  padding: 0.5rem 0;
+}

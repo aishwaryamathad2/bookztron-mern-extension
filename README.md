@@ -1,16 +1,16 @@
 # Bookztron MERN Bookstore (Educational Project)
 
-This project is an educational extension of the frontend UI inspired by the open-source project:
+This project is an educational extension of an open-source frontend project originally created by:
 https://github.com/Naman-Saxena1/Bookztron-E-Commerce_Book_Store
 
-## What I Implemented
-- Node.js & Express backend
-- MongoDB database (Atlas)
-- Authentication & authorization
+## My Contributions
+- Complete backend using Node.js and Express
+- MongoDB Atlas integration
+- Authentication and authorization (users, authors, publishers, admin)
 - Role-based dashboards
-- Cart, checkout, and order flow
-- API integration with frontend
+- Cart, checkout, and order management
+- API integration between frontend and backend
 
 ## Disclaimer
-This project is built for learning, academic, and portfolio purposes only.
-Original frontend UI credit goes to the respective author.
+This project is built strictly for educational and portfolio purposes.
+All credit for the original frontend UI goes to the respective author.

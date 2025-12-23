@@ -1,178 +1,85 @@
-import React, { useState, useEffect } from "react"
-import jwt_decode from "jwt-decode"
-import "./UserAuth.css"
-import { Link, useNavigate } from "react-router-dom"
-import axios from "axios"
-import { 
-    useToast, 
-    useUserLogin, 
-    useWishlist,
-    useCart,
-    useOrders
-} from "../../index"
+//src/Pages/Authentication/login.jsx
+import React, { useState, useEffect } from "react";
+import jwt_decode from "jwt-decode";
+import "./UserAuth.css";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useAuth } from "../../Context/AuthContext"; 
+
+import {
+  useToast,
+  useUserLogin,
+  useWishlist,
+  useCart,
+  useOrders
+} from "../../index";
 
 function Login() {
-    const { setUserLoggedIn }       = useUserLogin()
-    const { showToast }             = useToast()
-    const { dispatchUserWishlist }  = useWishlist()
-    const { dispatchUserCart }      = useCart()
-    const { dispatchUserOrders }    = useOrders()
+  const { setUserLoggedIn } = useUserLogin();
+  const { showToast } = useToast();
+  const { dispatchUserWishlist } = useWishlist();
+  const { dispatchUserCart } = useCart();
+  const { dispatchUserOrders } = useOrders();
 
-    const [userEmail, setUserEmail]       = useState('')
-    const [userPassword, setUserPassword] = useState('')
+  const [userEmail, setUserEmail] = useState("");
+  const [userPassword, setUserPassword] = useState("");
+  const { login } = useAuth(); // ✅ NOW WE WILL USE THIS PROPERLY
 
-    const navigate = useNavigate()
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        const token = localStorage.getItem('token')
+  async function loginUser(event) {
+    event.preventDefault();
 
-        if (token) {
-            const user = jwt_decode(token)
-            if (!user) {
-                localStorage.removeItem('token')
-            } else {
-                (async function getUpdatedWishlistAndCart() {
-                    let updatedUserInfo = await axios.get(
-                        "http://localhost:5000/api/users/me",
-                        {
-                            headers: {
-                            Authorization: `Bearer ${localStorage.getItem("token")}`,
-                            },
-                        }
-                        );
+    try {
+      const res = await axios.post("http://localhost:5000/api/auth/login", {
+        email: userEmail,
+        password: userPassword,
+      });
 
+      const { token, user } = res.data;
 
+      if (!token || !user) throw new Error("Invalid login response");
 
-                    if (updatedUserInfo.data.status === "ok") {
-                        dispatchUserWishlist({
-                            type: "UPDATE_USER_WISHLIST",
-                            payload: updatedUserInfo.data.user.wishlist
-                        })
-                        dispatchUserCart({
-                            type: "UPDATE_USER_CART",
-                            payload: updatedUserInfo.data.user.cart
-                        })
-                        dispatchUserOrders({
-                            type: "UPDATE_USER_ORDERS",
-                            payload: updatedUserInfo.data.user.orders
-                        })
-                    }
-                })()
-            }
-        }
-    }, [dispatchUserCart, dispatchUserOrders, dispatchUserWishlist])
+      // ✅ USE AuthContext login instead of manual localStorage only
+      login(user, token);
 
-    function loginUser(event) {
-        event.preventDefault();
+      // ✅ Sync wishlist/cart/orders if needed
+      dispatchUserWishlist({ type: "UPDATE_USER_WISHLIST", payload: res.data.wishlist || [] });
+      dispatchUserCart({ type: "UPDATE_USER_CART", payload: res.data.cart || [] });
+      dispatchUserOrders({ type: "UPDATE_USER_ORDERS", payload: res.data.orders || [] });
 
-        axios.post("http://localhost:5000/api/auth/login", {
-            email: userEmail,
-            password: userPassword
-        })
-        .then(res => {
-            if (res.data.token) {
-                localStorage.setItem("token", res.data.token);
-                showToast("success", "", "Logged in successfully");
-                setUserLoggedIn(true);
+      showToast("success", "", "Logged in successfully");
+      setUserLoggedIn(true);
 
-                dispatchUserWishlist({
-                    type: "UPDATE_USER_WISHLIST",
-                    payload: res.data.wishlist || []
-                });
-                dispatchUserCart({
-                    type: "UPDATE_USER_CART",
-                    payload: res.data.cart || []
-                });
-                dispatchUserOrders({
-                    type: "UPDATE_USER_ORDERS",
-                    payload: res.data.orders || []
-                });
-
-                // ✅ Decode token and navigate based on role
-// ✅ Decode token and navigate based on role
-                    const decodedUser = jwt_decode(res.data.token);
-                            console.log("Decoded JWT:", decodedUser);
-
-                            switch (decodedUser.role) {
-                            case "admin":
-                                navigate("/admin/dashboard");
-                                break;
-                            case "author":
-                                navigate("/author/dashboard");
-                                break;
-                            case "publisher":
-                                navigate("/publisher/dashboard");
-                                break;
-                            default:
-                                navigate("/");
-                            }
-
-
-            } else {
-                throw new Error("No token received");
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            showToast("error", "", "Error logging in user. Please try again");
-        });
+      // ✅ Role-based redirect
+      console.log("Decoded JWT:", jwt_decode(token));
+      if (user.role === "admin") navigate("/admin/dashboard");
+      else if (user.role === "author") navigate("/author/dashboard");
+      else if (user.role === "publisher") navigate("/publisher/dashboard");
+      else navigate("/");
+      
+    } catch (err) {
+      console.error("Login failed:", err);
+      showToast("error", "", "Error logging in user. Please try again");
     }
+  }
 
-    return (
-        <div className="user-auth-content-container">
-            <form onSubmit={loginUser} className="user-auth-form">
-                <h2>Login</h2>
-                
-                <div className="user-auth-input-container">
-                    <label htmlFor="user-auth-input-email"><h4>Email address</h4></label>
-                    <input 
-                        id="user-auth-input-email" 
-                        className="user-auth-form-input" 
-                        type="email" 
-                        placeholder="Email" 
-                        value={userEmail}
-                        onChange={(event) => setUserEmail(event.target.value)}
-                        required
-                    />
-                </div>
+  return (
+    <div className="user-auth-content-container">
+      <form onSubmit={loginUser} className="user-auth-form">
+        <h2>Login</h2>
 
-                <div className="user-auth-input-container">
-                    <label htmlFor="user-auth-input-password"><h4>Password</h4></label>
-                    <input 
-                        id="user-auth-input-password" 
-                        className="user-auth-form-input" 
-                        type="password" 
-                        placeholder="Password" 
-                        value={userPassword}
-                        onChange={(event) => setUserPassword(event.target.value)}
-                        required
-                    />
-                </div>
+        <input type="email" placeholder="Email" value={userEmail} onChange={(e) => setUserEmail(e.target.value)} required />
+        <input type="password" placeholder="Password" value={userPassword} onChange={(e) => setUserPassword(e.target.value)} required />
 
-                <div className="user-options-container">
-                    <div className="remember-me-container">
-                        <input type="checkbox" id="remember-me"/>
-                        <label htmlFor="remember-me">Remember Me</label>
-                    </div>
-                    <div>
-                        <Link to="#" className="links-with-blue-underline" id="forgot-password">
-                            Forgot Password?
-                        </Link>
-                    </div>
-                </div>
+        <button type="submit" className="solid-success-btn form-user-auth-submit-btn">Login</button>
 
-                <button type="submit" className="solid-success-btn form-user-auth-submit-btn">
-                    Login
-                </button>
-
-                <div className="new-user-container">
-                    <Link to="/signup" className="links-with-blue-underline" id="new-user-link">
-                        Create new account &nbsp; 
-                    </Link>
-                </div>
-            </form>
+        <div className="new-user-container">
+          <Link to="/signup" className="links-with-blue-underline">Create new account</Link>
         </div>
-    )
+      </form>
+    </div>
+  );
 }
 
-export { Login }
+export { Login };

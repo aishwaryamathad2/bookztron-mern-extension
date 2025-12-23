@@ -15,6 +15,8 @@ function AnaDashboard() {
           <li><Link to="proposals">Proposals</Link></li>
           <li><Link to="book-list">My Books</Link></li>
           <li><Link to="sales-insights">Sales Insights</Link></li>
+          <li><Link to="/author/addbook">Add New Book</Link></li>
+
         </ul>
       </aside>
 <main className="dashboard-content">

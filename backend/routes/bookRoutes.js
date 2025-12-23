@@ -1,48 +1,70 @@
 //bookroutes
-import { Router } from "express";
+import express from "express";
+import mongoose from "mongoose"; // ✅ Import mongoose to convert string → ObjectId
+import Book from "../models/Book.js";
 import {
   listBooks,
   listBooksByCategory,
-  getBook,
+  getBookById,
+  getMyBooks,
+   getBooksByAuthor,
+   getBooksByPublisher,
   createBook,
-  updateBook,
-  deleteBook,
+  addBook,
+  updateBookPrice,
+  deletePublisherBook,
   approveBook,
   rejectBook,
   adminListBooks,
   adminUpdateBook,
   adminDeleteBook,
-  addReview,            // ✅ new
-  deleteReview          // ✅ new
+  addReview,
+  deleteReview,
 } from "../controllers/bookController.js";
+//import { verifyToken } from "../middleware/authMiddleware.js";
+import { protect, authorizeRoles } from "../middleware/authMiddleware.js";
+//import Book from "../models/Book.js";
+import User from "../models/User.js";
 
-import { protect } from "../middleware/authMiddleware.js";
-import { allowRoles } from "../middleware/roleMiddleware.js";
+const router = express.Router();
 
-const router = Router();
+// ✅ Get books by specific author (fixed ObjectId casting)
+router.get("/author/:authorId", getBooksByAuthor);
+// ✅ Get all books for the logged-in publisher
+router.get(
+  "/publisher/books",
+  protect,
+  authorizeRoles("publisher", "admin"),
+  getBooksByPublisher
+);
 
-// 📚 Public
+
+// Public routes
 router.get("/", listBooks);
-router.get("/admin/all", protect, allowRoles("admin"), adminListBooks);
-// bookRoutes.js
 router.get("/category/:category", listBooksByCategory);
-router.get("/:id", getBook);
 
-// ✍️ Author/Publisher/Admin
-router.post("/", protect, allowRoles("author", "publisher", "admin"), createBook);
-router.put("/:id", protect, allowRoles("author", "publisher", "admin"), updateBook);
-router.delete("/:id", protect, allowRoles("author", "publisher", "admin"), deleteBook);
+// Protected routes
+router.get("/my-books", protect, getMyBooks);
+//router.get("/author/:id", getBooksByAuthor); 
+router.post("/", protect, authorizeRoles("author", "publisher", "admin"), createBook);
+//arouter.post("/", addBook);
+// bookRoutes.js
+router.put("/:id", protect, authorizeRoles("publisher", "admin"), updateBookPrice);
+router.delete("/:id", protect, authorizeRoles("publisher", "admin"), deletePublisherBook);
 
-// ✅ Publisher/Admin
-router.put("/:id/approve", protect, allowRoles("publisher", "admin"), approveBook);
-router.put("/:id/reject", protect, allowRoles("publisher", "admin"), rejectBook);
 
-// 👑 Admin only
-router.put("/admin/:id", protect, allowRoles("admin"), adminUpdateBook);
-router.delete("/admin/:id", protect, allowRoles("admin"), adminDeleteBook);
+// moderation
+router.put("/approve/:id", protect, authorizeRoles("publisher", "admin"), approveBook);
+router.put("/reject/:id", protect, authorizeRoles("publisher", "admin"), rejectBook);
 
-// ⭐ Reviews
-router.post("/:id/reviews", protect, addReview);              // Add review
-router.delete("/:id/reviews/:reviewId", protect, deleteReview); // Delete review
+//bookroutes which has adminroutes
+router.get("/admin/all", protect, authorizeRoles("admin"), adminListBooks);
+router.put("/admin/:id", protect, authorizeRoles("admin"), adminUpdateBook);
+router.delete("/admin/:id", protect, authorizeRoles("admin"), adminDeleteBook);
+
+// reviews
+router.post("/:id/review", protect, addReview);
+router.delete("/:id/review/:reviewId", protect, deleteReview);
+router.get("/:id", getBookById);
 
 export default router;

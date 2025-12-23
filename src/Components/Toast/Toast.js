@@ -1,3 +1,4 @@
+//toast
 import { useCallback, useEffect } from 'react'
 import './Toast.css'
 import { useToast } from "../../Context/toast-context"
@@ -31,7 +32,7 @@ function Toast({ position })
             {
                 toastList.map((toast, index) => (
                     <div key={index}
-                         className={`notification toast`}
+                         className={`toast`}
                          style={{backgroundColor : toast.backgroundColor}}
                     >
                         <div className="toast-content-container">

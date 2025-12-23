@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import "./BookDetails.css";
-import { useWishlist, useCart } from "../../index.js";  // ✅ import contexts
+import { useWishlist, useCart } from "../../index.js";
 
 const sampleReviews = [
   { user: "Ravi", comment: "Good book!", rating: 4 },
@@ -23,13 +23,26 @@ function BookDetails() {
   useEffect(() => {
     async function fetchBook() {
       try {
-        const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/books/${id}`);
-        let bookData = res.data;
+        const res = await axios.get(`http://localhost:5000/api/books/${id}`);
+        const data = res.data.book || res.data;
 
-        // Add random rating + reviews
-       bookData = res.data; // ✅ use actual book data
+        // Add fallback rating & reviews
+        const randomRating = (Math.random() * 5).toFixed(1);
+        const randomReviews = Array.from(
+          { length: Math.floor(Math.random() * 3) + 1 },
+          () => sampleReviews[Math.floor(Math.random() * sampleReviews.length)]
+        );
 
-        setBook(bookData);
+        const formattedBook = {
+          ...data,
+          rating: data.rating || randomRating,
+          reviews: data.reviews?.length ? data.reviews : randomReviews,
+          coverUrl:
+            data.coverUrl ||
+            "https://via.placeholder.com/300x400?text=No+Image",
+        };
+
+        setBook(formattedBook);
       } catch (err) {
         console.error("Error fetching book details:", err);
       }
@@ -39,55 +52,63 @@ function BookDetails() {
 
   if (!book) return <p>Loading book details...</p>;
 
-  // ✅ Handlers
   const handleAddToWishlist = async () => {
-  try {
-    const token = localStorage.getItem("token");
-    const res =await axios.post(
-  `http://localhost:5000/api/users/wishlist/${id}`,
-  {},
-  { headers: { Authorization: `Bearer ${token}` } }
-);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.post(
+        `http://localhost:5000/api/users/wishlist/${id}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-
-
-    if (res.data.success) {
-      dispatchUserWishlist({ type: "UPDATE_USER_WISHLIST", payload: res.data.wishlist });
-      alert(`${book.title} added to wishlist!`);
+      if (res.data.success) {
+        dispatchUserWishlist({
+          type: "UPDATE_USER_WISHLIST",
+          payload: res.data.wishlist,
+        });
+        alert(`${book.title} added to wishlist!`);
+      }
+    } catch (err) {
+      console.error("Wishlist add error:", err);
+      alert("Failed to add to wishlist");
     }
-  } catch (err) {
-    console.error("Wishlist add error:", err);
-    alert("Failed to add to wishlist");
-  }
-};
+  };
 
-const handleAddToCart = async () => {
-  try {
-    const token = localStorage.getItem("token");
-   const res = await axios.post(
-  `http://localhost:5000/api/users/cart/${id}`,
-  {},
-  { headers: { Authorization: `Bearer ${token}` } }
-);
+  const handleAddToCart = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.post(
+        `http://localhost:5000/api/users/cart/${id}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-
-
-
-    if (res.data.success) {
-      dispatchUserCart({ type: "UPDATE_USER_CART", payload: res.data.cart });
-      alert(`${book.title} added to cart!`);
+      if (res.data.success) {
+        dispatchUserCart({
+          type: "UPDATE_USER_CART",
+          payload: res.data.cart,
+        });
+        alert(`${book.title} added to cart!`);
+      }
+    } catch (err) {
+      console.error("Cart add error:", err);
+      alert("Failed to add to cart");
     }
-  } catch (err) {
-    console.error("Cart add error:", err);
-    alert("Failed to add to cart");
-  }
-};
-
+  };
 
   return (
     <div className="book-details-container">
       <div className="book-details-card">
-        <img src={book.coverUrl} alt={book.title} className="book-details-img" />
+        <img
+          src={book.coverUrl}
+          alt={book.title}
+          className="book-details-img"
+          onError={(e) =>
+            (e.target.src =
+              "https://via.placeholder.com/300x400?text=No+Image")
+          }
+        />
+
         <div className="book-details-info">
           <h2>{book.title}</h2>
           <p><strong>Author:</strong> {book.author}</p>
@@ -96,9 +117,8 @@ const handleAddToCart = async () => {
           <p><strong>Description:</strong> {book.description}</p>
           <p><strong>Rating:</strong> ⭐ {book.rating}</p>
 
-          {/* ✅ Wishlist & Cart buttons */}
           <div className="book-actions">
-            <button onClick={handleAddToWishlist} className="wishlist-btn"> Add to Wishlist</button>
+            <button onClick={handleAddToWishlist} className="wishlist-btn">❤️ Add to Wishlist</button>
             <button onClick={handleAddToCart} className="cart-btn">🛒 Add to Cart</button>
           </div>
         </div>
@@ -109,7 +129,7 @@ const handleAddToCart = async () => {
         {book.reviews.length > 0 ? (
           book.reviews.map((review, index) => (
             <div key={index} className="review-card">
-              <p><strong>{review.user}:</strong> {review.comment}</p>
+              <p><strong>{review.user || "Anonymous"}:</strong> {review.comment}</p>
               <p>⭐ {review.rating}</p>
             </div>
           ))
@@ -121,5 +141,4 @@ const handleAddToCart = async () => {
   );
 }
 
-
-export { BookDetails };
+export default BookDetails;

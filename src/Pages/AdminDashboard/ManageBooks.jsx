@@ -1,3 +1,4 @@
+//src/AdminDashboard/ManageBooks
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "../AdminDashboard/admin.css";
@@ -10,19 +11,31 @@ const ManageBooks = () => {
   const [newPrice, setNewPrice] = useState("");
 
   const fetchBooks = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const { data } = await axios.get("http://localhost:5000/api/books", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+  try {
+    const token = localStorage.getItem("token");
+    const { data } = await axios.get("http://localhost:5000/api/books/admin/all", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (Array.isArray(data)) {
       setBooks(data);
-      setLoading(false);
-    } catch (err) {
-      console.error("❌ Fetch Books Error:", err.response?.data || err.message);
-      setError("Failed to load books");
-      setLoading(false);
+    } else if (Array.isArray(data.books)) {
+      setBooks(data.books);
+    } else {
+      console.warn("Unexpected response format:", data);
+      setBooks([]);
     }
-  };
+
+    setLoading(false);
+  } catch (err) {
+    console.error("❌ Fetch Books Error:", err.response?.data || err.message);
+    setError("Failed to load books");
+    setBooks([]);
+    setLoading(false);
+  }
+};
+
+
 
   const deleteBook = async (id) => {
     if (!window.confirm("Are you sure you want to delete this book?")) return;

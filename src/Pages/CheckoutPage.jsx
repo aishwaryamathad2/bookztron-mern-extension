@@ -1,5 +1,7 @@
+//checkoutPage
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import "./Checkout.css"; // Make sure this is the LAST import
 
 const CheckoutPage = () => {
   const [cart, setCart] = useState([]);
@@ -8,6 +10,11 @@ const CheckoutPage = () => {
   const [address, setAddress] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("cash on delivery");
   const [user, setUser] = useState(null);
+
+  // NEW STATES (added for address checkboxes)
+  const [useDefaultAddress, setUseDefaultAddress] = useState(false);
+  const [useManualAddress, setUseManualAddress] = useState(true);
+const defaultAddress = user?.addresses?.find(addr => addr.isDefault);
 
   // ✅ Fetch cart & user
   useEffect(() => {
@@ -52,20 +59,18 @@ const CheckoutPage = () => {
     try {
       const token = localStorage.getItem("token");
       const orderData = {
-  contactNumber,
-  address,
-  paymentMethod, // ✅ no .toLowerCase()
-  items: cart.map((item) => ({
-  bookId: item.book?._id || item._id, // ✅ prefer book._id if available
-  title: item.book?.title || item.title,
-  coverUrl: item.book?.coverUrl || item.coverUrl,
-  price: item.book?.price || item.price,
-  quantity: item.quantity,
-})),
-
-  totalAmount,
-};
-
+        contactNumber,
+        address,
+        paymentMethod,
+        items: cart.map((item) => ({
+          bookId: item.book?._id || item._id,
+          title: item.book?.title || item.title,
+          coverUrl: item.book?.coverUrl || item.coverUrl,
+          price: item.book?.price || item.price,
+          quantity: item.quantity,
+        })),
+        totalAmount,
+      };
 
       await axios.post("http://localhost:5000/api/orders", orderData, {
         headers: { Authorization: `Bearer ${token}` },
@@ -124,21 +129,70 @@ const CheckoutPage = () => {
           onChange={(e) => setContactNumber(e.target.value)}
           className="w-full border rounded p-2"
         />
-        <textarea
-          placeholder="Delivery Address"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
+
+        {/* NEW — CHECKBOX SYSTEM START */}
+        <div className="border rounded p-4">
+          <h3 className="font-semibold mb-2">Delivery Address</h3>
+
+          {/* Default Address Checkbox */}
+          <div className="flex items-center mb-2">
+            <input
+              type="checkbox"
+              checked={useDefaultAddress}
+              disabled={!user} // only for logged-in users
+              onChange={() => {
+                setUseDefaultAddress(true);
+                setUseManualAddress(false);
+                setAddress(defaultAddress?.text || "");
+              }}
+              className="mr-2"
+            />
+            <label>Use My Default Address</label>
+          </div>
+
+          {useDefaultAddress && (
+            <p className="ml-6 text-sm text-gray-600">
+             📍 {defaultAddress?.text || "No default address saved."}
+             </p>
+          )}
+
+          {/* Manual Address Checkbox */}
+          <div className="flex items-center mt-2 mb-2">
+            <input
+              type="checkbox"
+              checked={useManualAddress}
+              onChange={() => {
+                setUseManualAddress(true);
+                setUseDefaultAddress(false);
+                setAddress("");
+              }}
+              className="mr-2"
+            />
+            <label>Enter Address Manually</label>
+          </div>
+
+          {/* Manual Address Input */}
+          <textarea
+            placeholder="Delivery Address"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            disabled={!useManualAddress}
+            className={`w-full border rounded p-2 ${
+              !useManualAddress ? "bg-gray-200 cursor-not-allowed" : ""
+            }`}
+          />
+        </div>
+        {/* NEW — CHECKBOX SYSTEM END */}
+
+        <select
+          value={paymentMethod}
+          onChange={(e) => setPaymentMethod(e.target.value)}
           className="w-full border rounded p-2"
-        />
-    <select
-  value={paymentMethod}
-  onChange={(e) => setPaymentMethod(e.target.value)}
-  className="w-full border rounded p-2"
->
-  <option value="Cash on Delivery">cash on delivery</option>
-  <option value="Rupay">Rupay</option>
-  <option value="UPI">UPI</option>
-</select>
+        >
+          <option value="Cash on Delivery">cash on delivery</option>
+          <option value="Rupay">Rupay</option>
+          <option value="UPI">UPI</option>
+        </select>
 
         <button
           onClick={handlePlaceOrder}

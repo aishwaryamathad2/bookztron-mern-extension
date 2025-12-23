@@ -1,0 +1,21 @@
+/* src/Pages/Publisher/publisher.css */
+.publisher-dashboard {
+  padding: 20px;
+}
+
+.publisher-nav {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.publisher-nav a {
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.publisher-nav a.active {
+  background: #4f46e5;
+  color: white;
+}

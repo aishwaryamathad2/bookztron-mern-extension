@@ -1,3 +1,4 @@
+//booklisting
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
@@ -9,7 +10,7 @@ const BooksListing = () => {
   const fetchBooks = async () => {
     try {
       const { data } = await axios.get("http://localhost:5000/api/books");
-      setBooks(data.books); // 👈 adjust if backend returns differently
+      setBooks(data); // 👈 adjust if backend returns differently
       setLoading(false);
     } catch (err) {
       console.error("Error fetching books:", err);
@@ -32,20 +33,25 @@ const BooksListing = () => {
             key={book._id}
             className="border rounded-lg shadow p-2 flex flex-col items-center bg-white"
           >
-            <img
-              src={book.coverUrl}
-              alt={book.bookName}
-              className="h-24 w-16 object-cover mb-2 rounded"
-            />
-            <h3 className="font-medium text-xs text-center">{book.bookName}</h3>
-            <p className="text-gray-500 text-xs">{book.author}</p>
-            <p className="mt-1 text-sm font-bold">
-              ₹{book.discountedPrice || book.originalPrice || book.price}
-            </p>
+<img
+  src={book.coverUrl || "https://via.placeholder.com/150"}
+  alt={book.title}
+  className="h-24 w-16 object-cover mb-2 rounded"
+/>
+
+<h3 className="font-medium text-xs text-center">{book.title}</h3>
+<p className="text-gray-500 text-xs">{book.author}</p>
+
+<p className="mt-1 text-sm font-bold">₹{book.price}</p>
+
+<p className="text-yellow-600 text-xs">
+  ⭐ {book.ratings || 0} / 5
+</p>
+
 
             {/* 👇 Link to product page */}
             <Link
-              to={`/product/${book._id}`}
+              to={`/book/${book._id}`}
               className="bg-blue-500 text-white px-2 py-1 text-xs rounded mt-2"
             >
               View Details

@@ -101,8 +101,8 @@ function Signup() {
             required
           >
             <option value="user">User</option>
-            <option value="admin">Admin</option>
-            <option value="author">Author</option>
+            
+           
             <option value="publisher">Publisher</option>
           </select>
         </div>
@@ -140,3 +140,58 @@ function Signup() {
 }
 
 export { Signup };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//<option value="admin">Admin</option>
+// <option value="author">Author</option>

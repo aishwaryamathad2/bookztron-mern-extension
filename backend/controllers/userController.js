@@ -1,12 +1,9 @@
+// userController.js
 import User from "../models/User.js";
 import mongoose from "mongoose";
+import { v4 as uuidv4 } from "uuid";
 
-// Get logged-in user's own profile
-// controllers/userController.js
-//import User from "../models/userModel.js";
-
-// Get logged-in user's profile (with wishlist + cart populated)
-// controllers/userController.js
+// ====================== GET LOGGED-IN USER ======================
 export const getMe = async (req, res) => {
   try {
     let user = await User.findById(req.user._id)
@@ -18,7 +15,7 @@ export const getMe = async (req, res) => {
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    // 🛠️ Clean up null cart items
+    // 🛠️ Clean null cart items
     user.cart = user.cart.filter((item) => item.book !== null);
 
     res.json(user);
@@ -28,13 +25,7 @@ export const getMe = async (req, res) => {
   }
 };
 
-
-
-
-
-
-
-// Get all users (admin only)
+// ====================== ADMIN USER CONTROLS ======================
 export const getUsers = async (req, res) => {
   try {
     const users = await User.find().select("-password");
@@ -83,9 +74,7 @@ export const deleteUser = async (req, res) => {
   }
 };
 
-
-// Add to Wishlist
-// Add to Wishlist
+// ====================== WISHLIST ======================
 export const addToWishlist = async (req, res) => {
   try {
     const { bookId } = req.params;
@@ -143,7 +132,7 @@ export const removeFromWishlist = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ removeFromWishlist error:", error.message);
-    res.status(500).json({ message: "Failed to remove item from wishlist", error: error.message });
+    res.status(500).json({ message: "Failed to remove item from wishlist" });
   }
 };
 
@@ -186,7 +175,7 @@ export const addToCart = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ addToCart error:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -215,6 +204,92 @@ export const removeFromCart = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ removeFromCart error:", error.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// ====================== ADDRESS MANAGEMENT ======================
+
+// ➕ Add Address
+export const addAddress = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    const { text } = req.body;
+
+    if (!text) return res.status(400).json({ message: "Address text is required" });
+
+    const newAddress = {
+      _id: uuidv4(),
+      text,
+      isDefault: user.addresses.length === 0 // First address becomes default
+    };
+
+    user.addresses.push(newAddress);
+    await user.save();
+
+    res.json({ success: true, address: newAddress, addresses: user.addresses });
+  } catch (error) {
+    console.error("❌ addAddress error:", error.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// ✏️ Edit Address
+export const editAddress = async (req, res) => {
+  try {
+    const { addressId } = req.params;
+    const { text } = req.body;
+
+    const user = await User.findById(req.user._id);
+    const addr = user.addresses.find((a) => a._id === addressId);
+
+    if (!addr) return res.status(404).json({ message: "Address not found" });
+
+    addr.text = text;
+    await user.save();
+
+    res.json({ success: true, address: addr, addresses: user.addresses });
+  } catch (error) {
+    console.error("❌ editAddress error:", error.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// ❌ Delete Address
+export const deleteAddress = async (req, res) => {
+  try {
+    const { addressId } = req.params;
+    const user = await User.findById(req.user._id);
+
+    user.addresses = user.addresses.filter((a) => a._id !== addressId);
+
+    // If default deleted → set first as default
+    if (!user.addresses.some((a) => a.isDefault) && user.addresses.length > 0) {
+      user.addresses[0].isDefault = true;
+    }
+
+    await user.save();
+    res.json({ success: true, addresses: user.addresses });
+  } catch (error) {
+    console.error("❌ deleteAddress error:", error.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// ⭐ Set Default Address
+export const setDefaultAddress = async (req, res) => {
+  try {
+    const { addressId } = req.params;
+    const user = await User.findById(req.user._id);
+
+    user.addresses.forEach((a) => {
+      a.isDefault = a._id === addressId;
+    });
+
+    await user.save();
+    res.json({ success: true, addresses: user.addresses });
+  } catch (error) {
+    console.error("❌ setDefaultAddress error:", error.message);
     res.status(500).json({ message: "Server error" });
   }
 };

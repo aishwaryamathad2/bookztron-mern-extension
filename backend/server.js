@@ -1,3 +1,4 @@
+//server.js
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -15,7 +16,7 @@ import userRoutes from "./routes/userRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import cartRoute from "./routes/cartRoute.js";
 import authorAuthRoutes from "./routes/authorAuthRoutes.js";
-
+import proposalRoutes from "./routes/proposalRoutes.js";
 dotenv.config();
 const app = express();
 const __dirname = path.resolve();
@@ -38,14 +39,14 @@ app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
 // API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/books", bookRoutes);
-app.use("/api/authors", authorRoutes); // ✅ plural now
 app.use("/api/publisher", publisherRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/cart", cartRoute);
-app.use("/api/authors-auth", authorAuthRoutes);
-
+app.use("/api/authors-auth", authorAuthRoutes); // register/login authors
+app.use("/api/authors", authorRoutes); // author profile & books
+app.use("/api/proposals", proposalRoutes);
 // Serve frontend (AFTER API routes)
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "frontend/build")));

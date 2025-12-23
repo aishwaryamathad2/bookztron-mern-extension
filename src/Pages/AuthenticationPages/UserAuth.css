@@ -1,3 +1,4 @@
+/*UserAuth.css  */
 body
 {
     height: 100vh;
@@ -97,4 +98,16 @@ body
     font-size: 1.6rem;
     width: fit-content;
     text-align: center;
+}
+/* react-hot-toast container 
+.react-hot-toast {
+  right: 20px;        
+  bottom: 20px;        
+  width: auto !important;
+  max-width: 350px;
+}          */
+/* Correct Toast Overrides */
+[data-sonner-toaster] {
+  bottom: 20px !important;
+  right: 20px !important;
 }

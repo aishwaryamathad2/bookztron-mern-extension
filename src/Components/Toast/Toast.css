@@ -1,75 +1,149 @@
-.toasts-container
-{
-    font-size: 14px;
-    position: sticky;
-    bottom: 5px;
-    right: 5px;
-    z-index : 10;
-    overflow: hidden;
+/*toast.css*/
+/* ===== Base Toast Container ===== */
+.toasts-container {
+  position: fixed;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  pointer-events: none;
 }
 
-.bottom-right
-{
-    position: fixed;
-    bottom : 1rem;
-    right : 1rem;
-    animation: toast-from-right 0.7s;
+/* ===== Positions ===== */
+.toasts-container.top-right {
+  top: 1rem;
+  right: 1rem;
 }
 
-.notification
-{
-    margin-bottom : 1rem;
-    border-radius : 4px;
-    box-shadow : 0 0 10px #999;
-    color : #000;
-    transition: 0.3s ease;
+.toasts-container.top-left {
+  top: 1rem;
+  left: 1rem;
 }
 
-.notification:hover
-{
-    box-shadow: 0 0 12px #fff;
-
+.toasts-container.bottom-right {
+  bottom: 1rem;
+  right: 1rem;
 }
 
-.toast
-{
-    width : 365px;
-    color : #fff;
-    padding : 15px 15px 15px 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-family: Arial, Helvetica, sans-serif;
-    animation: toast-from-right 0.7s;
+.toasts-container.bottom-left {
+  bottom: 1rem;
+  left: 1rem;
 }
 
-.toast-content-container
-{
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+/* ===== Each Toast Box ===== */
+.toast {
+  pointer-events: all;
+  width: 280px;
+  background-color: #2ecc71;
+  color: white;
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+  font-family: "Inter", Arial, sans-serif;
+  animation: toastSlideIn 0.35s ease forwards;
 }
 
-.toast-title, .toast-description
-{
-    margin: 0;
+/* Text styling */
+.toast-content-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
 }
 
-.toast-close-btn
-{
-    height: fit-content;
-    padding: 6.5px 10px;
-    border-radius: 50%;
-    border: none;
+.toast-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
 }
 
-/* Toast should come from right */
-@keyframes toast-from-right
-{
-    from {
-        transform: translateX(100%)
-    }
-    to {
-        transform: translateX(0%)
-    }
+.toast-description {
+  font-size: 12.5px;
+  margin: 0;
+  opacity: 0.9;
+}
+
+/* Close button */
+.toast-close-btn {
+  border: none;
+  background: transparent;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-left: 8px;
+}
+
+.toast-close-btn:hover {
+  opacity: 0.8;
+}
+
+/* Slide animation */
+@keyframes toastSlideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+/* ===== Base Toast Container ===== */
+.toasts-container {
+  position: fixed !important;
+  min-height: auto !important;
+  height: auto !important;
+}
+
+
+/* ===== Each Toast Box ===== */
+.toast {
+  pointer-events: all;
+  width: 280px;
+  background-color: #2ecc71;
+  color: white;
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+  font-family: "Inter", Arial, sans-serif;
+  animation: toastSlideIn 0.35s ease forwards;
+
+  height: auto;         /* ✅ NEW */
+  max-height: none;     /* ✅ NEW */
+}
+/* --- FORCE Toast to normal size --- */
+/* 🔥 FORCE Toast to behave normally (fixes the giant panel problem) */
+/* --- FIX: prevent toast container stretching --- */
+.toasts-container {
+  position: fixed !important;
+  width: auto !important;
+  max-width: fit-content !important;
+  height: auto !important;
+  max-height: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-end !important;
+  pointer-events: none !important;
+}
+
+/* --- FIX: bottom-right alignment --- */
+.toasts-container.bottom-right {
+  bottom: 1rem !important;
+  right: 1rem !important;
+  top: auto !important;
+  left: auto !important;
+}
+
+/* --- FIX: toast width (global CSS was forcing 100%) --- */
+.notification.toast {
+  width: 280px !important;
+  max-width: 280px !important;
+  min-width: 280px !important;
 }

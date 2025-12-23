@@ -1,4 +1,4 @@
-// frontend/src/utils/axiosinstance.js
+/* frontend/src/utils/axiosinstance.js
 import axios from "axios";
 
 // Create an axios instance
@@ -21,4 +21,28 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-export default axiosInstance;
+export default axiosInstance;   */
+
+// ✅ src/Utils/axiosInstance.js
+
+// ✅ src/Utils/axiosInstance.js
+
+// src/Utils/axiosInstance.js
+import axios from "axios";
+
+const api = axios.create({
+  baseURL: "http://localhost:5000/api",
+  withCredentials: true,
+});
+
+// ✅ Add token automatically
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+export default api;
+

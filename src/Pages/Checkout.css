@@ -1,49 +1,89 @@
-.checkout-page {
-  max-width: 500px;
-  margin: 30px auto;
-  padding: 20px;
-  background: #fff;
+/*checkout.css */
+/* Wrapper styling - targets your existing div */
+.max-w-3xl {
+  margin-top: 30px;
+  background: #ffffff;
+  padding: 30px;
   border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.checkout-form {
+/* Section headings */
+.max-w-3xl h2 {
+  font-size: 26px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.max-w-3xl h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+/* User info styling */
+.max-w-3xl p {
+  font-size: 15px;
+  margin-bottom: 5px;
+}
+
+/* Cart container */
+.border.rounded.p-4 {
+  background: #fafafa;
+  border: 1px solid #e0e0e0 !important;
+  padding: 16px !important;
+  border-radius: 10px !important;
+  margin-bottom: 20px;
+}
+
+/* Each cart row */
+.border.rounded.p-4 > div {
+  padding: 6px 0;
+}
+
+/* Total amount */
+.font-bold.text-lg {
+  font-size: 20px !important;
+  font-weight: bold !important;
+  text-align: right;
+}
+
+/* Form container */
+.space-y-4 {
   display: flex;
-  flex-direction: column; /* 👈 vertical form */
-  gap: 15px;
+  flex-direction: column;
+  gap: 14px;
 }
 
-.checkout-form input,
-.checkout-form textarea {
+/* Inputs styling */
+.space-y-4 input,
+.space-y-4 textarea,
+.space-y-4 select {
   padding: 12px;
   border: 1px solid #ccc;
   border-radius: 8px;
-  font-size: 16px;
-}
-
-.checkout-form textarea {
-  min-height: 80px;
-  resize: vertical;
-}
-
-.checkout-form label {
   font-size: 15px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  width: 100%;
+  transition: 0.2s;
 }
 
-.checkout-btn {
-  background-color: #007bff;
-  color: #fff;
-  padding: 14px;
-  font-size: 18px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
+.space-y-4 input:focus,
+.space-y-4 textarea:focus,
+.space-y-4 select:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+/* Confirm button */
+.bg-blue-600 {
+  width: 100%;
+  padding: 14px !important;
+  border-radius: 8px !important;
+  font-size: 16px;
+  font-weight: bold;
   transition: 0.3s ease;
 }
 
-.checkout-btn:hover {
-  background-color: #0056b3;
+.bg-blue-600:hover {
+  background-color: #0056b3 !important;
 }
